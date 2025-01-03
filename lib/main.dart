@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:racetech_dashboard/models/sessionDetails.dart';
+import 'package:racetech_dashboard/providers/user_provider.dart';
+import "package:provider/provider.dart";
 import 'package:racetech_dashboard/screens/login.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => SessionDetails(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Racetech Dashsboard',
+      title: 'Racetech Dashboard',
       theme: ThemeData(
         fontFamily: "Montserrat",
         // This is the theme of your application.

@@ -4,9 +4,11 @@ import 'package:racetech_dashboard/widgets/defaultRoundedButton.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class DefaultProgressDialog extends StatefulWidget {
-  DefaultProgressDialog({Key? key, this.text, this.title}) : super(key: key);
+  DefaultProgressDialog({Key? key, this.text, this.title, this.positiveButton})
+      : super(key: key);
   String? text;
   String? title;
+  Function()? positiveButton;
   @override
   _DefaultProgressDialogState createState() => _DefaultProgressDialogState();
 }

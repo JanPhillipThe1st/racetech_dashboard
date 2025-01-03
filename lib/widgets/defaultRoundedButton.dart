@@ -5,9 +5,15 @@ import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class DefaultRoundedButton extends StatefulWidget {
   DefaultRoundedButton(
-      {Key? key, this.text, this.fontSize, this.onePressed, this.color})
+      {Key? key,
+      this.text,
+      this.fontSize,
+      this.onePressed,
+      this.color,
+      this.isInverted})
       : super(key: key);
   String? text;
+  bool? isInverted;
   Color? color;
   double? fontSize;
   Function()? onePressed;
@@ -18,10 +24,10 @@ class DefaultRoundedButton extends StatefulWidget {
 class _DefaultRoundedButtonState extends State<DefaultRoundedButton> {
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      style: ButtonStyle(
-        backgroundColor:
-            MaterialStatePropertyAll(const Color.fromARGB(0, 255, 255, 255)),
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: Colors.white, width: 0.5),
+        backgroundColor: const Color.fromARGB(0, 255, 255, 255),
       ),
       onPressed: widget.onePressed ??
           () {

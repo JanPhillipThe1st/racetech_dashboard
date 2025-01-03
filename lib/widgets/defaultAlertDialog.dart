@@ -21,7 +21,9 @@ class _DefaultAlertDialogState extends State<DefaultAlertDialog> {
       ),
       actions: [
         DefaultRoundedButton(
+          isInverted: true,
           text: "OK",
+          color: Colors.white,
           fontSize: 12,
           onePressed: () {
             Navigator.of(context).pop();

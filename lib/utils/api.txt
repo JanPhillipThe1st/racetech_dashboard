@@ -1,0 +1,35 @@
+######### login function #########
+
+    function login(username, password) {
+        $.post('/api/loginuser', {
+            'username': username,
+            'password': password,
+            '_token': $('input[name=_token]').val()
+        }, function(data) {
+             console.log(data.status.code);
+            if( (data.status.code != "0") && (data.status.message == "Success") ) {
+                $(".alertLoginFailed").hide();
+                //console.log("True");
+                localStorage.setItem("IsLogin", data.status.is_login);
+                localStorage.setItem("LoginToken", data.status.login_token);
+                localStorage.setItem("podsdifdfdcnds", data.status.user_id);
+                localStorage.setItem("dsdpsdcvdnvddi", data.status.user_type);
+                localStorage.setItem("fullname", data.status.full_name);
+                location.reload();
+            } else {
+                $(".alertLoginFailed").show();
+            }
+        });
+    }
+
+### get list of event 
+GET method
+https://racetechph.com/myeventlist
+
+### get startlist per event
+GET method 
+https://racetechph.com/myeventlist/startlist{raceid}
+
+## example 
+
+https://racetechph.com/myeventlist/startlist/10240

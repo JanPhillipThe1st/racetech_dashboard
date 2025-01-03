@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DefaultTextField extends StatefulWidget {
@@ -21,10 +22,15 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
             borderRadius: BorderRadius.circular(30),
           ),
           color: Colors.white),
-      child: TextField(
-        controller: widget.controller,
-        decoration: InputDecoration.collapsed(hintText: widget.hintText),
-        obscureText: widget.isPassword ?? false,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextField(
+            controller: widget.controller,
+            decoration: InputDecoration.collapsed(hintText: widget.hintText),
+            obscureText: widget.isPassword ?? false,
+          ),
+        ],
       ),
     );
   }
