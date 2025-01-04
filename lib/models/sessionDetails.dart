@@ -1,48 +1,81 @@
 import "dart:convert";
 
-import "package:cloud_firestore/cloud_firestore.dart";
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+import "package:http/http.dart" as http;
 
-class SessionDetails extends ChangeNotifier {
-  String? code = "0";
-  String? isLoggedIn;
-  String? loginToken;
-  String? userId;
-  String? userType;
-  String? fullName;
-  String? givenName;
-  String? message;
+class SessionDetails with ChangeNotifier {
+  Map<String, dynamic>? sessionDetailsMap;
+  Map<String, dynamic>? userDetailsMap;
+  List<Map<String, dynamic>>? myEventList;
 
-  SessionDetails(
-      {this.code,
-      this.isLoggedIn,
-      this.loginToken,
-      this.userId,
-      this.userType,
-      this.fullName,
-      this.givenName,
-      this.message});
-  static SessionDetails fromJSON(String jsonString) {
-    Map<String, String> sessionDetailsMap = json.decode(jsonString)["status"];
-    return SessionDetails(
-        code: sessionDetailsMap["is_login"].toString(),
-        isLoggedIn: sessionDetailsMap["is_login"].toString(),
-        loginToken: sessionDetailsMap["login_token"].toString(),
-        userId: sessionDetailsMap["user_id"].toString(),
-        userType: sessionDetailsMap["user_type"].toString(),
-        fullName: sessionDetailsMap["full_name"].toString(),
-        givenName: sessionDetailsMap["given_name"].toString(),
-        message: sessionDetailsMap["message"].toString());
+  SessionDetails({
+    this.userDetailsMap,
+    this.sessionDetailsMap,
+  });
+
+  void loginUser(String username, String password) async {
+    http.Response response = await http
+        .post(
+          Uri.parse("https://racetechph.com/api/loginuser?"),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: json.encode(
+            {
+              "username": username,
+              "password": password,
+            },
+          ),
+        )
+        .then((value) => value);
+    sessionDetailsMap = json.decode(response.body);
+    print(response.headers);
+    updateCookie(response);
+    notifyListeners();
+    getUserDetails();
+    getMyEventList();
   }
 
-  Map<String, String> toJSON() => {
-        "code": code!,
-        "isLoggedIn": isLoggedIn!,
-        "loginToken": loginToken!,
-        "userId": userId!,
-        "userType": userType!,
-        "fullName": fullName!,
-        "givenName": givenName!,
-        "message": message!,
-      };
+  void getUserDetails() async {
+    http.Response response = await http.post(
+      Uri.parse("https://racetechph.com/api/accounts/getuser?"),
+      headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
+    ).then((value) => value);
+    userDetailsMap = json.decode(response.body)[0];
+    notifyListeners();
+  }
+
+// XSRF-TOKEN=eyJpdiI6InhKck5RcUQyQllPOFlFWmlwcTY0NlE9PSIsInZhbHVlIjoiWGw1ellOYlBUZFh0QmNNSTZwdkxzejJqWVpNTGNLdUFHYVRJY2c1YnlyOStKR3YwMEVzN1dWRDIzS01ETEhTR0t0R084VWxLZ2JQalI0QU5nTExSQmc9PSIsIm1hYyI6IjE3MjRhMmVmMzAxZWZmNjE1MzQ0YjkzMTZiNzRmY2M5N2MwYjJkMTFjOGNhYWQ2YzdmNzE1MWZmZWFkOTViMDgifQ%3D%3D
+// XSRF-TOKEN=eyJpdiI6IkZwR1gxWVc3XC92clN4NUR4S2E5cjhRPT0iLCJ2YWx1ZSI6InhNNHhOVEtzc3MyS2lCT1wvK3JvVDg1NGlrNGxNK3plREIxcEcwZU5uektTZHN0enhGaDEyUzBBc1ZVZFZJMXMwMjJMbzI0WGVXcm51QmtDTGl6b3lKUT09IiwibWFjIjoiMGRjODNkZjhkOTRhNDY4ZjQ1OGYyMjlmZDJkYmNlMzJkZDhiMDljOGFhY2JjZDU5M2Q4Yjc5OTdhYzhkNjY4NCJ9;
+//expires=Mon, 03-Feb-2025 09:19:32 GMT;
+//Max-Age=2592000; path=/; secure,
+//laravel_session=eyJpdiI6ImhHTG9IczhuWnczMjlQTDVON0VZYUE9PSIsInZhbHVlIjoiUk9pdFNqUXZVc2FRT1RqUTNlWk9INWlhNzRyUGV6WTVxdm9UaEFVUEx2a09rR01UM1hEMTN3Y2FpK2w3N2tqZzBvRnA2MTF2RVVuM0plck9RVUNFN0E9PSIsIm1hYyI6IjJhNDQ4NzJkMTk0NzExMDRmNGIxOGMxNDE3NmQzYjczYjMyYzBjM2JhMjA5YWQ5ODdiYTFmMjM2Y2ExOTI5OTYifQ%3D%3D; expires=Mon, 03-Feb-2025 09:19:32 GMT; Max-Age=2592000; path=/; httponly; secure
+  void updateCookie(http.Response response) {
+    //Find the XRF-TOKEN value from the 'set-cookie' string
+    String? rawCookie = response.headers["set-cookie"];
+    String xrfTokenString = rawCookie!
+        .split(";")
+        .where((element) => element.contains("secure,XSRF-TOKEN="))
+        .first
+        .substring("secure,".length + 1);
+    String laravelSessionString = rawCookie!
+        .split(";")
+        .where((element) => element.contains("secure,laravel_session="))
+        .first
+        .substring("secure,".length + 1);
+    print(xrfTokenString);
+    if (rawCookie != null) {
+      int index = rawCookie.indexOf(';');
+      sessionDetailsMap!['cookie'] =
+          xrfTokenString + ";" + laravelSessionString + ";";
+    }
+  }
+
+  void getMyEventList() async {
+    http.Response response = await http.get(
+      Uri.parse("https://racetechph.com/myeventlist?"),
+      headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
+    ).then((value) => value);
+    myEventList = List<Map<String, dynamic>>.from(json.decode(response.body));
+    notifyListeners();
+  }
 }

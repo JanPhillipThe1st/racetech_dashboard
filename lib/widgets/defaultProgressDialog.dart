@@ -37,15 +37,6 @@ class _DefaultProgressDialogState extends State<DefaultProgressDialog> {
           ),
         ],
       ),
-      actions: [
-        DefaultRoundedButton(
-          text: "OK",
-          fontSize: 12,
-          onePressed: () {
-            Navigator.of(context).pop();
-          },
-        )
-      ],
     );
   }
 }

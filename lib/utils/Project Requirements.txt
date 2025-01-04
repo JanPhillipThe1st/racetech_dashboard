@@ -1,0 +1,21 @@
+App With user login 
+Available menu
+-Upcoming events
+-Race result
+-My account
+
+Upcoming events (races)
+List of upcoming events/ races
+Clickable to view details 
+On the events details page, information will be displayed
+ categories with radio button
+will also be displayed so that participants can select category.
+
+
+
+Then Yung participants may qr code Sila. 
+Yung admin scan nya qr code ng participants, tapos lalabas na details nya. 
+Then may itatape na button si admin "Assign Bib no."
+
+Then may option to input manualy or scan qr code 
+Then I click ng admin Yung save.

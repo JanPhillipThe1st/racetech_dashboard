@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:racetech_dashboard/models/sessionDetails.dart';
+import 'package:racetech_dashboard/screens/pages/dashboard.dart';
 import 'package:racetech_dashboard/screens/pages/myAccount.dart';
+import 'package:racetech_dashboard/screens/pages/myEvents.dart';
 import 'package:racetech_dashboard/screens/pages/raceResult.dart';
 import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/defaultAlertDialog.dart';
+import "package:provider/provider.dart";
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({Key? key}) : super(key: key);
-
+  const Homepage({
+    Key? key,
+  }) : super(key: key);
   @override
   _HomepageState createState() => _HomepageState();
 }
@@ -42,17 +47,36 @@ class _HomepageState extends State<Homepage> {
     pageController.jumpToPage(page);
   }
 
-  List<Widget> homeScreenItems = [MyAccount(), RaceResult()];
+  List<Widget> homeScreenItems = [
+    Dashboard(),
+    RaceResult(),
+    MyEvents(),
+    MyAccount(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Consumer<SessionDetails>(
+          builder: (context, value, child) => DefaultText(
+              color: racetechPrimaryColor,
+              fontSize: 16,
+              text: value.sessionDetailsMap == null
+                  ? "Fetching name..."
+                  : "Welcome, " +
+                      value.sessionDetailsMap!["status"]["full_name"] +
+                      "!"),
+          child: Text("Loading data..."),
+        ),
+      ),
       body: PageView(
         children: homeScreenItems,
         controller: pageController,
         onPageChanged: onPageChanged,
       ),
       bottomNavigationBar: CupertinoTabBar(
+        height: 80,
         backgroundColor: Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -80,9 +104,10 @@ class _HomepageState extends State<Homepage> {
           BottomNavigationBarItem(
             icon: Icon(
               Icons.person,
-              color: (_page == 4) ? racetechPrimaryColor : Colors.black,
+              size: 36,
+              color: (_page == 3) ? racetechPrimaryColor : Colors.black,
             ),
-            label: 'Profile',
+            label: 'Account',
             backgroundColor: racetechPrimaryColor,
           ),
         ],

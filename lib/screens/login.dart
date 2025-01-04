@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:racetech_dashboard/models/sessionDetails.dart';
 import 'package:racetech_dashboard/screens/homepage.dart';
 import 'package:racetech_dashboard/widgets/defaultAlertDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultIconTextField.dart';
@@ -14,6 +15,7 @@ import "package:mailto/mailto.dart";
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:http/http.dart' as http;
+import "package:provider/provider.dart";
 
 class Login extends StatefulWidget {
   Login({Key? key}) : super(key: key);
@@ -76,6 +78,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final sessionDetails = Provider.of<SessionDetails>(context);
     return Scaffold(
         body: Container(
       height: double.maxFinite,
@@ -170,20 +173,25 @@ class _LoginState extends State<Login> {
                             builder: (context) => DefaultProgressDialog(
                               text: "Logging in..",
                             ),
-                          ).then((value) async {
-                            await _login().then((loginResponse) {
-                              if (loginResponse != null) {
-                                print(jsonDecode(loginResponse!)["status"]
-                                    ["message"]);
-                                if (jsonDecode(loginResponse)["status"]
-                                        ["message"]
-                                    .toString()
-                                    .contains("Success")) {
+                          );
+
+                          await _login().then((loginResponse) {
+                            if (loginResponse != null) {
+                              print(jsonDecode(loginResponse!)["status"]
+                                  ["message"]);
+                              if (jsonDecode(loginResponse)["status"]["message"]
+                                  .toString()
+                                  .contains("Success")) {
+                                sessionDetails.loginUser(
+                                    _usernameController.text,
+                                    _passwordController.text);
+                                sessionDetails.addListener(() {
+                                  Navigator.of(context).pop();
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (context) => Homepage()));
-                                }
+                                });
                               }
-                            });
+                            }
                           });
                         },
                       ),
