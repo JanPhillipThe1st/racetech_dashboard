@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:racetech_dashboard/models/sessionDetails.dart';
-import 'package:racetech_dashboard/providers/user_provider.dart';
 import "package:provider/provider.dart";
 import 'package:racetech_dashboard/screens/login.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ChangeNotifierProvider(
       create: (context) => SessionDetails(),

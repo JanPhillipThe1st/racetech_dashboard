@@ -12,8 +12,8 @@ class RaceResult extends StatefulWidget {
 class _RaceResultState extends State<RaceResult> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
+    return Scaffold(
+      body: Container(
         width: double.maxFinite,
         color: racetechPrimaryColor,
         child: Flex(

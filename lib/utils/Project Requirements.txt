@@ -19,3 +19,30 @@ Then may itatape na button si admin "Assign Bib no."
 
 Then may option to input manualy or scan qr code 
 Then I click ng admin Yung save.
+
+
+# January 9, 2025
+Pag nag click ng event may mga button na lalabas.
+
+- Manage event
+- Manage startlist (eto Yung magdodowload ng startlist)
+Pagkaclick ng manage startlist madodownload sya locally 
+
+Bale pagka download ng list, Meron datagrid for list ng runners showing
+Name, 
+gender,
+Distance
+Category
+Bib number (if already assigned) 
+ With status
+- Green  kapag ok na
+- red kapag Di pa ok
+
+Then may button na search
+Then pwede mag search Pwedeng by typing ref no. or scan ng barcode / qr code.
+
+Then kapag na search na may button na "Assign bib"
+Then lalabas input box (for manual type) or camera for scan qr code.
+
+Then one assigned na mag green status.
+Then may option. To upload data.

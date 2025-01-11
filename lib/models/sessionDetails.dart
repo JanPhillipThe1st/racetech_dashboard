@@ -8,6 +8,7 @@ class SessionDetails with ChangeNotifier {
   Map<String, dynamic>? sessionDetailsMap;
   Map<String, dynamic>? userDetailsMap;
   List<Map<String, dynamic>>? myEventList;
+  Image? userPhoto;
 
   SessionDetails({
     this.userDetailsMap,
@@ -30,9 +31,18 @@ class SessionDetails with ChangeNotifier {
     sessionDetailsMap = json.decode(response.body);
     print(response.headers);
     updateCookie(response);
-    notifyListeners();
+    userPhoto = Image.network(
+        "https://racetechph.com/assets/img/" +
+            sessionDetailsMap!["status"]["user_id"] +
+            ".jpg",
+        fit: BoxFit.fitHeight,
+        errorBuilder: (context, error, stackTrace) => Image.network(
+            "https://racetechph.com/assets/img/" +
+                sessionDetailsMap!["status"]["user_id"] +
+                ".png"));
     getUserDetails();
     getMyEventList();
+    notifyListeners();
   }
 
   void getUserDetails() async {
@@ -41,7 +51,6 @@ class SessionDetails with ChangeNotifier {
       headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
     ).then((value) => value);
     userDetailsMap = json.decode(response.body)[0];
-    notifyListeners();
   }
 
 // XSRF-TOKEN=eyJpdiI6InhKck5RcUQyQllPOFlFWmlwcTY0NlE9PSIsInZhbHVlIjoiWGw1ellOYlBUZFh0QmNNSTZwdkxzejJqWVpNTGNLdUFHYVRJY2c1YnlyOStKR3YwMEVzN1dWRDIzS01ETEhTR0t0R084VWxLZ2JQalI0QU5nTExSQmc9PSIsIm1hYyI6IjE3MjRhMmVmMzAxZWZmNjE1MzQ0YjkzMTZiNzRmY2M5N2MwYjJkMTFjOGNhYWQ2YzdmNzE1MWZmZWFkOTViMDgifQ%3D%3D
@@ -76,6 +85,11 @@ class SessionDetails with ChangeNotifier {
       headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
     ).then((value) => value);
     myEventList = List<Map<String, dynamic>>.from(json.decode(response.body));
-    notifyListeners();
+    myEventList!.forEach((eventObject) {
+      eventObject["event_image"] = Image.network(
+        "https://racetechph.com/assets/img/" + eventObject["race_logo"],
+        fit: BoxFit.fitWidth,
+      );
+    });
   }
 }

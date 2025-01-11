@@ -44,14 +44,18 @@ class _HomepageState extends State<Homepage> {
 
   void navigationTapped(int page) {
     //Animating Page
-    pageController.jumpToPage(page);
+    pageController.animateToPage(
+      page,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   List<Widget> homeScreenItems = [
-    Dashboard(),
-    RaceResult(),
-    MyEvents(),
-    MyAccount(),
+    Dashboard(key: UniqueKey()),
+    RaceResult(key: UniqueKey()),
+    MyEvents(key: UniqueKey()),
+    MyAccount(key: UniqueKey()),
   ];
 
   @override
@@ -71,6 +75,7 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       body: PageView(
+        pageSnapping: true,
         children: homeScreenItems,
         controller: pageController,
         onPageChanged: onPageChanged,

@@ -7,10 +7,14 @@ class DefaultIconTextField extends StatefulWidget {
       required this.hintText,
       this.controller,
       this.isPassword,
+      this.onTextChanged,
+      this.onIconClicked,
       required this.iconData})
       : super(key: key);
   String hintText = "";
   IconData? iconData;
+  Function(String)? onTextChanged;
+  Function()? onIconClicked;
   bool? isPassword = false;
   TextEditingController? controller;
   @override
@@ -22,7 +26,7 @@ class _DefaultIconTextFieldState extends State<DefaultIconTextField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -36,11 +40,15 @@ class _DefaultIconTextFieldState extends State<DefaultIconTextField> {
           Expanded(
             child: TextField(
               controller: widget.controller,
+              onChanged: widget.onTextChanged,
               decoration: InputDecoration.collapsed(hintText: widget.hintText),
               obscureText: widget.isPassword ?? false,
             ),
           ),
-          Icon(widget.iconData)
+          GestureDetector(
+            child: Icon(widget.iconData),
+            onTap: widget.onIconClicked,
+          )
         ],
       ),
     );

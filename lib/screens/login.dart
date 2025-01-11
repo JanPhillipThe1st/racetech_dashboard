@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,9 @@ class _LoginState extends State<Login> {
 
   TextEditingController _passwordController =
       TextEditingController(text: "theDeathGodKuro!");
+  // TextEditingController _usernameController = TextEditingController();
+
+  // TextEditingController _passwordController = TextEditingController();
 
   launchMailto() async {
     final mailtoLink = Mailto(
@@ -48,7 +52,7 @@ class _LoginState extends State<Login> {
     bool? res = await FlutterPhoneDirectCaller.callNumber(number);
   }
 
-  Future<String> _login() async {
+  Future<String?> _login() async {
     //Error response format
     //     {
     //     "status": {
@@ -61,21 +65,38 @@ class _LoginState extends State<Login> {
         '   {"status": {"code": "0","message": "Failed","is_login": "No"}}';
     String successResponse =
         '   {"status": {"code": "0","message": "Success","is_login": "Yes"}}';
-    String response = await http
-        .post(
-          Uri.parse("https://racetechph.com/api/loginuser?"),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: json.encode(
-            {
-              "username": _usernameController.text,
-              "password": _passwordController.text,
-            },
+    try {
+      String response = await http
+          .post(
+            Uri.parse("https://racetechph.com/api/loginuser?"),
+            headers: {'Content-Type': 'application/json; charset=UTF-8'},
+            body: json.encode(
+              {
+                "username": _usernameController.text,
+                "password": _passwordController.text,
+              },
+            ),
+          )
+          .then((value) => value.body);
+
+      return response;
+    } catch (e) {
+      if (e is SocketException) {
+        showDialog(
+          context: context,
+          builder: (context) => DefaultAlertDialog(
+            text: "No internet connection...",
           ),
-        )
-        .then((value) => value.body);
-    return response;
+        ).then((value) {
+          setState(() {
+            isDismissible = true;
+          });
+        });
+      }
+    }
   }
 
+  bool isDismissible = false;
   @override
   Widget build(BuildContext context) {
     final sessionDetails = Provider.of<SessionDetails>(context);
@@ -169,11 +190,12 @@ class _LoginState extends State<Login> {
                         color: Colors.white,
                         onePressed: () async {
                           showDialog(
-                            context: context,
-                            builder: (context) => DefaultProgressDialog(
-                              text: "Logging in..",
-                            ),
-                          );
+                              context: context,
+                              builder: (context) => DefaultProgressDialog(
+                                    text: "Logging in...",
+                                    title: "Login",
+                                  ),
+                              barrierDismissible: isDismissible);
 
                           await _login().then((loginResponse) {
                             if (loginResponse != null) {
@@ -190,6 +212,14 @@ class _LoginState extends State<Login> {
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (context) => Homepage()));
                                 });
+                              } else {
+                                Navigator.of(context).pop();
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => DefaultAlertDialog(
+                                    text: "Invalid username/password",
+                                  ),
+                                ).then((value) {});
                               }
                             }
                           });

@@ -15,8 +15,8 @@ class MyAccount extends StatefulWidget {
 class _MyAccountState extends State<MyAccount> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
+    return Scaffold(
+      body: Container(
         width: double.maxFinite,
         color: Colors.white,
         child: Flex(
@@ -37,18 +37,7 @@ class _MyAccountState extends State<MyAccount> {
                         child: Container(
                           clipBehavior: Clip.hardEdge,
                           decoration: ShapeDecoration(shape: CircleBorder()),
-                          child: Image.network(
-                              "https://racetechph.com/assets/img/" +
-                                  value.sessionDetailsMap!["status"]
-                                      ["user_id"] +
-                                  ".jpg",
-                              fit: BoxFit.fitHeight,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Image.network(
-                                      "https://racetechph.com/assets/img/" +
-                                          value.sessionDetailsMap!["status"]
-                                              ["user_id"] +
-                                          ".png")),
+                          child: value.userPhoto,
                         ),
                       );
                     }

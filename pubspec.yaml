@@ -45,13 +45,14 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
   google_fonts: ^6.2.0
   mailto: ^2.0.0
   url_launcher: ^6.3.0
   flutter_phone_direct_caller: ^2.1.1
   bloc: ^8.1.4
   flutter_bloc: ^8.1.6
+  path_provider: ^2.1.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -85,10 +86,12 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: fonts/Montserrat-Regular.ttf
-          weight: 700
-    - family: Montserrat-Bold
+    - family: MontserratBold
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
+    - family: MontserratBlack
+      fonts:
+        - asset: fonts/Montserrat-Black.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

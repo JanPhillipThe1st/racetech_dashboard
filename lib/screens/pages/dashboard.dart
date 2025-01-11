@@ -12,12 +12,10 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        width: double.maxFinite,
+    return Scaffold(
+      body: Container(
         color: racetechPrimaryColor,
-        child: Flex(
-          direction: Axis.vertical,
+        child: Column(
           children: [
             Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
