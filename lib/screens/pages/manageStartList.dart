@@ -3,6 +3,7 @@ import "dart:io";
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:racetech_dashboard/screens/pages/scanRacerQR.dart';
 import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/categoryCards.dart';
 import 'package:racetech_dashboard/widgets/defaultIconTextField.dart';
@@ -10,6 +11,7 @@ import 'package:racetech_dashboard/widgets/defaultProgressDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultRoundedButton.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:mobile_scanner/mobile_scanner.dart";
 import "package:http/http.dart" as http;
 
 class ManageStartList extends StatefulWidget {
@@ -18,6 +20,8 @@ class ManageStartList extends StatefulWidget {
   @override
   _ManageStartListState createState() => _ManageStartListState();
 }
+
+List<Barcode> _barcodes = [];
 
 class _ManageStartListState extends State<ManageStartList> {
   Future<String> get _localPath async {
@@ -97,6 +101,7 @@ class _ManageStartListState extends State<ManageStartList> {
   }
 
   TextEditingController _refNumberController = TextEditingController();
+  bool _isScanning = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,12 +146,38 @@ class _ManageStartListState extends State<ManageStartList> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                       ),
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isScanning = _isScanning ? false : true;
+                          });
+                        },
                         child: Icon(Icons.qr_code_2_rounded,
                             size: 32, color: Colors.white),
                       )
                     ],
                   ),
                 ),
+                _isScanning
+                    ? Expanded(
+                        flex: 4,
+                        child: MobileScanner(
+                          onScannerStarted: (args) {},
+                          onDetect: (BarcodeCapture capture) {
+                            if (_isScanning) {
+                              _barcodes = capture.barcodes;
+                              _refNumberController.text =
+                                  _barcodes[0].rawValue.toString();
+                              setState(() {
+                                readOfflineStartlist();
+                                _isScanning = false;
+                              });
+                            }
+                          },
+                        ),
+                      )
+                    : Container(
+                        height: 0,
+                      ),
                 Expanded(
                   flex: 8,
                   child: FutureBuilder(
@@ -361,6 +392,9 @@ class _ManageStartListState extends State<ManageStartList> {
                             text: "Please wait...",
                           ),
                       barrierDismissible: false);
+                  Future.delayed(const Duration(seconds: 1)).then((value) {
+                    Navigator.of(context).pop();
+                  });
                 },
                 child: Container(
                   constraints: BoxConstraints.expand(),
