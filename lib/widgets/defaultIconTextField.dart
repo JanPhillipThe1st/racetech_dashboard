@@ -9,10 +9,12 @@ class DefaultIconTextField extends StatefulWidget {
       this.isPassword,
       this.onTextChanged,
       this.onIconClicked,
+      this.textInputType,
       required this.iconData})
       : super(key: key);
   String hintText = "";
   IconData? iconData;
+  TextInputType? textInputType;
   Function(String)? onTextChanged;
   Function()? onIconClicked;
   bool? isPassword = false;
@@ -39,6 +41,7 @@ class _DefaultIconTextFieldState extends State<DefaultIconTextField> {
         children: [
           Expanded(
             child: TextField(
+              keyboardType: widget.textInputType ?? TextInputType.text,
               controller: widget.controller,
               onChanged: widget.onTextChanged,
               decoration: InputDecoration.collapsed(hintText: widget.hintText),

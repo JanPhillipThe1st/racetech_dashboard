@@ -22,10 +22,14 @@
         });
     }
 
+_____________________________________________________
+
 ### get list of event 
 GET method
 https://racetechph.com/myeventlist
 
+
+____________________________________________________________
 ### get startlist per event
 GET method 
 https://racetechph.com/myeventlist/startlist{raceid}
@@ -33,3 +37,29 @@ https://racetechph.com/myeventlist/startlist{raceid}
 ## example 
 
 https://racetechph.com/myeventlist/startlist/10240
+
+
+_________________________________________________________
+
+########## upload date ###############
+## Post method
+https://racetechph.com/mobile/uploadstartlist/update
+
+_________________________________________________________
+
+### get list of past events
+## get method
+https://racetechph.com/result
+
+_________________________________________________________
+
+### get race result of specific race event
+## get method
+https://racetechph.com/uploadedresult/{race_id}
+
+
+
+
+
+
+

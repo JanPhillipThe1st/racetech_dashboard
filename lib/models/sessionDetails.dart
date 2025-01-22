@@ -8,6 +8,7 @@ class SessionDetails with ChangeNotifier {
   Map<String, dynamic>? sessionDetailsMap;
   Map<String, dynamic>? userDetailsMap;
   List<Map<String, dynamic>>? myEventList;
+  List<Map<String, dynamic>>? raceResultList;
   Image? userPhoto;
 
   SessionDetails({
@@ -42,6 +43,7 @@ class SessionDetails with ChangeNotifier {
                 ".png"));
     getUserDetails();
     getMyEventList();
+    getRaceResults();
     notifyListeners();
   }
 
@@ -87,6 +89,21 @@ class SessionDetails with ChangeNotifier {
     myEventList = List<Map<String, dynamic>>.from(json.decode(response.body));
     myEventList!.forEach((eventObject) {
       eventObject["event_image"] = Image.network(
+        "https://racetechph.com/assets/img/" + eventObject["race_logo"],
+        fit: BoxFit.fitWidth,
+      );
+    });
+  }
+
+  void getRaceResults() async {
+    http.Response response = await http.get(
+      Uri.parse("https://racetechph.com/mobile/raceresults?"),
+      headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
+    ).then((value) => value);
+    raceResultList =
+        List<Map<String, dynamic>>.from(json.decode(response.body));
+    raceResultList!.forEach((eventObject) {
+      eventObject["race_logo"] = Image.network(
         "https://racetechph.com/assets/img/" + eventObject["race_logo"],
         fit: BoxFit.fitWidth,
       );
