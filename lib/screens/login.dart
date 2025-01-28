@@ -97,6 +97,7 @@ class _LoginState extends State<Login> {
   }
 
   bool isDismissible = false;
+  bool passwordObscured = true;
   @override
   Widget build(BuildContext context) {
     final sessionDetails = Provider.of<SessionDetails>(context);
@@ -174,8 +175,11 @@ class _LoginState extends State<Login> {
                       child: DefaultIconTextField(
                         hintText: "Enter your password here...",
                         controller: _passwordController,
-                        isPassword: true,
+                        isPassword: passwordObscured,
                         iconData: CupertinoIcons.padlock,
+                        onIconClicked: () {
+                          passwordObscured = passwordObscured ? false : true;
+                        },
                       ),
                       margin: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 20),

@@ -7,11 +7,13 @@ class DefaultText extends StatelessWidget {
       required this.fontSize,
       this.color,
       this.fontFamily,
+      this.textAlign,
       this.fontWeight})
       : super(key: key);
   String text = "Insert text here";
   Color? color;
   String? fontFamily;
+  TextAlign? textAlign;
   double fontSize = 12;
   FontWeight? fontWeight = FontWeight.normal;
   @override
@@ -19,7 +21,7 @@ class DefaultText extends StatelessWidget {
     return Text(
       text,
       overflow: TextOverflow.visible,
-      textAlign: TextAlign.center,
+      textAlign: textAlign ?? TextAlign.center,
       style: TextStyle(
           fontFamily: fontFamily ?? "Montserrat",
           fontSize: fontSize,

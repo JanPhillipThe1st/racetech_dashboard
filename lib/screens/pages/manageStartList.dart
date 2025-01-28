@@ -3,9 +3,9 @@ import "dart:io";
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:racetech_dashboard/models/sessionDetails.dart';
 import 'package:racetech_dashboard/providers/startListStateProvider.dart';
 import 'package:racetech_dashboard/screens/pages/assignBibNumber.dart';
-import 'package:racetech_dashboard/screens/pages/scanRacerQR.dart';
 import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/categoryCards.dart';
 import 'package:racetech_dashboard/widgets/defaultAlertDialog.dart';
@@ -100,6 +100,7 @@ class _ManageStartListState extends State<ManageStartList> {
   bool _isScanning = false;
   @override
   Widget build(BuildContext context) {
+    final _sessionDetails = Provider.of<SessionDetails>(context, listen: false);
     StartListProvider _startListProvider =
         Provider.of<StartListProvider>(context);
     return Scaffold(
@@ -488,7 +489,7 @@ class _ManageStartListState extends State<ManageStartList> {
           Expanded(
               flex: 1,
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   showDialog(
                       context: context,
                       builder: (context) => DefaultProgressDialog(
@@ -496,7 +497,39 @@ class _ManageStartListState extends State<ManageStartList> {
                             text: "Please wait...",
                           ),
                       barrierDismissible: false);
-                  Future.delayed(const Duration(seconds: 1)).then((value) {
+                  List<Map<String, dynamic>> startlistData = [];
+                  offlineStartList.forEach((racist) {
+                    startlistData.add({
+                      "user_id": _sessionDetails.sessionDetailsMap!["status"]
+                              ["user_id"]
+                          .toString(),
+                      "race_id": racist["race_id"].toString(),
+                      "ref_id": racist["ref_id"].toString(),
+                      "bib_number": racist["bib_number"].toString(),
+                      "racer_name": racist["racer_name"].toString(),
+                      "gender": racist["gender"].toString(),
+                      "chip_id": racist["chip_id"].toString(),
+                      "category": racist["category"].toString(),
+                      "distance_name": racist["distance_name"].toString(),
+                      "shirt": "0"
+                    });
+                  });
+                  await http
+                      .post(
+                          Uri.parse(
+                              "https://racetechph.com/mobile/uploadstartlist/update?"),
+                          headers: {
+                            "cookie": _sessionDetails
+                                .sessionDetailsMap!["cookie"]
+                                .toString(),
+                            "content-type": "application/json"
+                          },
+                          body: json.encode({"startlist_data": startlistData}))
+                      .then((value) {
+                    print(value.statusCode);
+                    print(value.reasonPhrase);
+                    print(value.body);
+                    print(json.encode({"startlist_data": startlistData}));
                     Navigator.of(context).pop();
                   });
                 },

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:mobile_scanner/mobile_scanner.dart";
-import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class ScanRacerQR extends StatefulWidget {

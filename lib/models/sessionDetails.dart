@@ -8,7 +8,7 @@ class SessionDetails with ChangeNotifier {
   Map<String, dynamic>? sessionDetailsMap;
   Map<String, dynamic>? userDetailsMap;
   List<Map<String, dynamic>>? myEventList;
-  List<Map<String, dynamic>>? raceResultList;
+  List<Map<String, dynamic>>? raceList;
   Image? userPhoto;
 
   SessionDetails({
@@ -30,7 +30,6 @@ class SessionDetails with ChangeNotifier {
         )
         .then((value) => value);
     sessionDetailsMap = json.decode(response.body);
-    print(response.headers);
     updateCookie(response);
     userPhoto = Image.network(
         "https://racetechph.com/assets/img/" +
@@ -63,6 +62,7 @@ class SessionDetails with ChangeNotifier {
   void updateCookie(http.Response response) {
     //Find the XRF-TOKEN value from the 'set-cookie' string
     String? rawCookie = response.headers["set-cookie"];
+
     String xrfTokenString = rawCookie!
         .split(";")
         .where((element) => element.contains("secure,XSRF-TOKEN="))
@@ -73,11 +73,9 @@ class SessionDetails with ChangeNotifier {
         .where((element) => element.contains("secure,laravel_session="))
         .first
         .substring("secure,".length + 1);
-    print(xrfTokenString);
     if (rawCookie != null) {
       int index = rawCookie.indexOf(';');
-      sessionDetailsMap!['cookie'] =
-          xrfTokenString + ";" + laravelSessionString + ";";
+      sessionDetailsMap!['cookie'] = "$xrfTokenString;$laravelSessionString;";
     }
   }
 
@@ -100,13 +98,26 @@ class SessionDetails with ChangeNotifier {
       Uri.parse("https://racetechph.com/mobile/raceresults?"),
       headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
     ).then((value) => value);
-    raceResultList =
-        List<Map<String, dynamic>>.from(json.decode(response.body));
-    raceResultList!.forEach((eventObject) {
-      eventObject["race_logo"] = Image.network(
-        "https://racetechph.com/assets/img/" + eventObject["race_logo"],
-        fit: BoxFit.fitWidth,
-      );
+    raceList =
+        List<Map<String, dynamic>>.from(json.decode(response.body)["races"]);
+    raceList!.forEach((eventObject) async {
+      try {
+        eventObject["race_logo"] = await Image.network(
+          "https://racetechph.com/assets/img/" + eventObject["race_logo"],
+          fit: BoxFit.fitWidth,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            "img/running.png",
+            alignment: Alignment.bottomCenter,
+            scale: 0.2,
+          ),
+        );
+      } catch (e) {
+        eventObject["race_logo"] = Image.asset(
+          "img/running.png",
+          scale: 100,
+          fit: BoxFit.fill,
+        );
+      }
     });
   }
 }

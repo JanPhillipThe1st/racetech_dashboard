@@ -45,17 +45,99 @@ _________________________________________________________
 ## Post method
 https://racetechph.com/mobile/uploadstartlist/update
 
+###sample post request with data
+
+ $.post('https://racetechph.com/mobile/uploadstartlist/update', {
+
+	'user_id': user_id,
+        'race_id': raceid,
+	'ref_id': ref_id,
+	'bib_number' :bib_number,
+        'racer_name':racer_name,
+	'gender':gender,
+	'chip_id':chip,
+	'category':category,
+	'distance_name':distance,
+	'shirt':shirt
+        }
+ );
 _________________________________________________________
 
-### get list of past events
+### get list of past races
 ## get method
-https://racetechph.com/result
+https://racetechph.com/mobile/raceresults
 
 _________________________________________________________
 
 ### get race result of specific race event
 ## get method
-https://racetechph.com/uploadedresult/{race_id}
+https://racetechph.com/mobile/uploadedresult/{race_id}
+
+
+eto sir ang para sa Sign-up 
+
+Pagkaclick ng Sign up lalabas input form 
+
+Firstname
+Middlename
+Lastname
+Gender
+team
+Birthdate
+Address
+Country
+State / province
+City
+Email
+Contact no.
+
+(Incase of emergency
+Contact person
+Contact no.
+
+
+
+Post method
+https://racetechph.com/api/personalinformartion/insert
+
+//Sample data
+
+{           'givenName': "Juan",
+            'middleName': "Reyes",
+            'surName': "Delacruz",            
+            'birthDate': "01-01-2025",
+            'gender': "male",
+            'contactEmail': "juandelacruz@gmail.com",
+            'contactNumber': "09171123654",
+            'address': "address",
+            'city': "city",
+            'state': "state",
+            'country': "Philippines",                      
+            'emergencyName': "Albert",
+            'emergencyContact': "091723654546",
+            'team': "teamname"
+            
+        }
+
+After mafill up ng form, click SAVE. Magpapaprocess sa backend, then ang return ay user_id
+
+Then after ma-insert lalabas naman ang input form para sa username password 
+automatic yung email add nya gagwin username. Bale password na lang ang iinput nya
+
+Then Click save
+
+eto naman ang post method 
+
+https://racetechph.com/api/accounts/insertuser
+
+//sample data
+
+{
+            'racer_id': user_id,   //user_id
+            'username': username,
+            'password': password
+      }
+
 
 
 

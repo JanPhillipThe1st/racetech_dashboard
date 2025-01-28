@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:racetech_dashboard/models/sessionDetails.dart';
 import 'package:racetech_dashboard/screens/pages/manageStartList.dart';
 import 'package:racetech_dashboard/screens/pages/raceDetails.dart';
-import 'package:racetech_dashboard/utils/colors.dart';
 import "package:provider/provider.dart";
-import 'package:racetech_dashboard/widgets/defaultProgressDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class MyEvents extends StatefulWidget {
