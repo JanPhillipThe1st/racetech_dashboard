@@ -9,12 +9,16 @@ class DefaultRoundedButton extends StatefulWidget {
       this.text,
       this.fontSize,
       this.onePressed,
+      this.borderSide,
       this.color,
+      this.backgroundColor,
       this.isInverted})
       : super(key: key);
   String? text;
+  BorderSide? borderSide;
   bool? isInverted;
   Color? color;
+  Color? backgroundColor;
   double? fontSize;
   Function()? onePressed;
   @override
@@ -26,8 +30,9 @@ class _DefaultRoundedButtonState extends State<DefaultRoundedButton> {
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        side: BorderSide(color: Colors.white, width: 0.5),
-        backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+        side: widget.borderSide ?? BorderSide(color: Colors.white, width: 0.5),
+        backgroundColor:
+            widget.backgroundColor ?? const Color.fromARGB(0, 255, 255, 255),
       ),
       onPressed: widget.onePressed ??
           () {

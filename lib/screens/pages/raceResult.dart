@@ -43,6 +43,9 @@ class _RaceResultState extends State<RaceResult> {
                   onIconClicked: () {
                     setState(() {});
                   },
+                  onTextChanged: (textValue) {
+                    setState(() {});
+                  },
                   hintText: "Race title",
                   iconData: Icons.search,
                 )),
@@ -71,7 +74,8 @@ class _RaceResultState extends State<RaceResult> {
                   raceData = sessionDetailsRaceData.raceList!
                       .where((race) => race["race_title"]
                           .toString()
-                          .contains(_raceTitleController.text))
+                          .toLowerCase()
+                          .contains(_raceTitleController.text.toLowerCase()))
                       .toList();
                 }
                 return RefreshIndicator(

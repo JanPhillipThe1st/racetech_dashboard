@@ -4,6 +4,7 @@ import 'package:racetech_dashboard/models/sessionDetails.dart';
 import 'package:racetech_dashboard/screens/pages/manageStartList.dart';
 import 'package:racetech_dashboard/screens/pages/raceDetails.dart';
 import "package:provider/provider.dart";
+import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 
 class MyEvents extends StatefulWidget {
@@ -19,7 +20,7 @@ class _MyEventsState extends State<MyEvents> {
     return Scaffold(
       body: Container(
         width: double.maxFinite,
-        color: const Color.fromARGB(255, 230, 230, 230),
+        color: racetechPrimaryColor,
         child: Flex(
           mainAxisAlignment: MainAxisAlignment.start,
           direction: Axis.vertical,

@@ -21,12 +21,14 @@ class _DefaultInfoItemState extends State<DefaultInfoItem> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Icon(
-            widget.iconData ?? CupertinoIcons.ant,
-            weight: 1,
-            size: 16,
-            color: Colors.white,
-          ),
+          widget.iconData == null
+              ? Container()
+              : Icon(
+                  widget.iconData ?? CupertinoIcons.ant,
+                  weight: 1,
+                  size: 16,
+                  color: Colors.white,
+                ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4),
           ),

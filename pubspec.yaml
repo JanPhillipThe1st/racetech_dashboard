@@ -77,6 +77,10 @@ flutter:
     - img/running.png
     - img/champion.gif
     - img/loading.gif
+    - img/registration.png
+    - img/runners.png
+    - img/sos.gif
+    - img/ambulance.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

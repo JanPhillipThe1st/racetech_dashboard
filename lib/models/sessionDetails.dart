@@ -1,8 +1,10 @@
 import "dart:convert";
+import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:http/http.dart" as http;
+import "package:path_provider/path_provider.dart";
 
 class SessionDetails with ChangeNotifier {
   Map<String, dynamic>? sessionDetailsMap;
@@ -93,13 +95,27 @@ class SessionDetails with ChangeNotifier {
     });
   }
 
+  Future<String> get _localPath async {
+    final directory = await getExternalStorageDirectory();
+
+    return directory!.path;
+  }
+
+  Future<File> get _raceResultFile async {
+    final path = await _localPath;
+    return File('$path/.json');
+  }
+
   void getRaceResults() async {
+    final file = await _raceResultFile;
+
     http.Response response = await http.get(
       Uri.parse("https://racetechph.com/mobile/raceresults?"),
       headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
     ).then((value) => value);
     raceList =
         List<Map<String, dynamic>>.from(json.decode(response.body)["races"]);
+    file.writeAsString(json.encode(raceList));
     raceList!.forEach((eventObject) async {
       try {
         eventObject["race_logo"] = await Image.network(

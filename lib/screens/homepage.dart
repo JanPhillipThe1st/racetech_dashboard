@@ -51,73 +51,91 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  List<Widget> homeScreenItems = [
-    Dashboard(key: UniqueKey()),
-    RaceResult(key: UniqueKey()),
-    MyEvents(key: UniqueKey()),
-    MyAccount(key: UniqueKey()),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Consumer<SessionDetails>(
-          builder: (context, value, child) => DefaultText(
-              color: racetechPrimaryColor,
-              fontSize: 16,
-              text: value.sessionDetailsMap == null
-                  ? "Fetching name..."
-                  : "Welcome, " +
-                      value.sessionDetailsMap!["status"]["full_name"] +
-                      "!"),
-          child: Text("Loading data..."),
+    List<Widget> homeScreenItems = [
+      Dashboard(
+        key: UniqueKey(),
+        pageController: pageController,
+      ),
+      RaceResult(key: UniqueKey()),
+      MyEvents(key: UniqueKey()),
+      MyAccount(key: UniqueKey()),
+    ];
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 6,
+          backgroundColor: racetechPrimaryColor,
+          foregroundColor: Colors.white70,
+          title: Consumer<SessionDetails>(
+            builder: (context, value, child) => DefaultText(
+                color: Colors.white70,
+                fontSize: 16,
+                text: value.sessionDetailsMap == null
+                    ? "Fetching name..."
+                    : "Welcome, " +
+                        value.sessionDetailsMap!["status"]["full_name"] +
+                        "!"),
+            child: Text("Loading data..."),
+          ),
         ),
-      ),
-      body: PageView(
-        pageSnapping: true,
-        children: homeScreenItems,
-        controller: pageController,
-        onPageChanged: onPageChanged,
-      ),
-      bottomNavigationBar: CupertinoTabBar(
-        height: 80,
-        backgroundColor: Colors.white,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              color: (_page == 0) ? racetechPrimaryColor : Colors.black,
-            ),
-            label: 'Home',
-            backgroundColor: racetechPrimaryColor,
-          ),
-          BottomNavigationBarItem(
+        body: PageView(
+          pageSnapping: true,
+          children: homeScreenItems,
+          controller: pageController,
+          onPageChanged: onPageChanged,
+        ),
+        bottomNavigationBar: CupertinoTabBar(
+          height: 80,
+          backgroundColor: Colors.white,
+          activeColor: racetechPrimaryColor,
+          inactiveColor: Color.fromARGB(255, 139, 139, 139),
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
               icon: Icon(
-                Icons.list_rounded,
-                color: (_page == 1) ? racetechPrimaryColor : Colors.black,
+                Icons.home,
+                color: (_page == 0)
+                    ? racetechPrimaryColor
+                    : Color.fromARGB(255, 139, 139, 139),
               ),
-              label: 'Results',
-              backgroundColor: racetechPrimaryColor),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.calendar_month_rounded,
-                color: (_page == 2) ? racetechPrimaryColor : Colors.black,
-              ),
-              label: 'Events',
-              backgroundColor: racetechPrimaryColor),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              size: 36,
-              color: (_page == 3) ? racetechPrimaryColor : Colors.black,
+              label: 'Dashboard',
+              backgroundColor: racetechPrimaryColor,
             ),
-            label: 'Account',
-            backgroundColor: racetechPrimaryColor,
-          ),
-        ],
-        onTap: navigationTapped,
-        currentIndex: _page,
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.list_rounded,
+                  color: (_page == 1)
+                      ? racetechPrimaryColor
+                      : Color.fromARGB(255, 139, 139, 139),
+                ),
+                label: 'Results',
+                backgroundColor: racetechPrimaryColor),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.calendar_month_rounded,
+                  color: (_page == 2)
+                      ? racetechPrimaryColor
+                      : Color.fromARGB(255, 139, 139, 139),
+                ),
+                label: 'Events',
+                backgroundColor: racetechPrimaryColor),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person,
+                size: 36,
+                color: (_page == 3)
+                    ? racetechPrimaryColor
+                    : Color.fromARGB(255, 139, 139, 139),
+              ),
+              label: 'Account',
+              backgroundColor: racetechPrimaryColor,
+            ),
+          ],
+          onTap: navigationTapped,
+          currentIndex: _page,
+        ),
       ),
     );
   }
