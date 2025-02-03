@@ -125,12 +125,14 @@ class _MyEventsState extends State<MyEvents> {
                                                           Navigator.of(context)
                                                               .push(
                                                                   MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                ManageStartList(
-                                                                    race_id: value
-                                                                            .myEventList![index]
-                                                                        [
-                                                                        "race_id"]),
+                                                            builder: (context) => ManageStartList(
+                                                                race_details:
+                                                                    value.myEventList![
+                                                                        index],
+                                                                race_id: value
+                                                                            .myEventList![
+                                                                        index][
+                                                                    "race_id"]),
                                                           ));
                                                         },
                                                         value: 2,

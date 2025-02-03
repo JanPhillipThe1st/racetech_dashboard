@@ -9,6 +9,7 @@ import 'package:racetech_dashboard/screens/pages/assignBibNumber.dart';
 import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/categoryCards.dart';
 import 'package:racetech_dashboard/widgets/defaultAlertDialog.dart';
+import 'package:racetech_dashboard/widgets/defaultAlertInputDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultIconTextField.dart';
 import 'package:racetech_dashboard/widgets/defaultProgressDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultRoundedButton.dart';
@@ -16,11 +17,16 @@ import 'package:racetech_dashboard/widgets/defaultText.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:provider/provider.dart";
 import "package:mobile_scanner/mobile_scanner.dart";
+import "package:permission_handler/permission_handler.dart";
+import "package:background_sms/background_sms.dart";
 import "package:http/http.dart" as http;
 
 class ManageStartList extends StatefulWidget {
-  const ManageStartList({Key? key, required this.race_id}) : super(key: key);
+  const ManageStartList(
+      {Key? key, required this.race_id, required this.race_details})
+      : super(key: key);
   final String race_id;
+  final Map<String, dynamic> race_details;
   @override
   _ManageStartListState createState() => _ManageStartListState();
 }
@@ -96,6 +102,42 @@ class _ManageStartListState extends State<ManageStartList> {
     }
   }
 
+  TextEditingController _smsMessageController = TextEditingController();
+  Future<void> notifyRacers(
+      {required String racerContact, required String textMessage}) async {
+    var status = await Permission.sms.request();
+    if (status.isGranted) {
+      await BackgroundSms.sendMessage(
+              phoneNumber: racerContact, message: textMessage)
+          .then((smsStatus) {
+        if (smsStatus == SmsStatus.sent) {
+          print("Sent to ${racerContact}");
+        } else {
+          print("Failed: ${smsStatus.name}");
+        }
+      });
+    } else if (status.isDenied) {
+      await Permission.sms.request().then((value) async {
+        if (value.isGranted) {
+          await BackgroundSms.sendMessage(
+                  phoneNumber: racerContact, message: textMessage)
+              .then((smsStatus) {
+            if (smsStatus == SmsStatus.sent) {
+              print("Sent to ${racerContact}");
+            } else {
+              print("Failed: ${smsStatus.name}");
+            }
+          });
+        }
+      });
+    }
+
+// You can also directly ask permission about its status.
+    if (await Permission.location.isRestricted) {
+      // The OS restricts access, for example, because of parental controls.
+    }
+  }
+
   TextEditingController _refNumberController = TextEditingController();
   bool _isScanning = false;
   @override
@@ -113,70 +155,214 @@ class _ManageStartListState extends State<ManageStartList> {
           PopupMenuButton(
             itemBuilder: (context) => [
               PopupMenuItem(
-                child: PopupMenuItem(
-                  value: 1,
-                  // row with 2 children
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_sweep_rounded,
-                        color: Colors.black,
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text("Clear startlist")
-                    ],
-                  ),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => DefaultAlertDialog(
-                        text:
-                            "Are you sure you want clear the startlist?\nAll progress will be lost.",
-                        actions: [
-                          DefaultRoundedButton(
-                            isInverted: true,
-                            text: "NO",
-                            color: Colors.white,
-                            fontSize: 12,
-                            onePressed: () {
+                value: 0,
+                // row with 2 children
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_sweep_rounded,
+                      color: Colors.black,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text("Clear startlist")
+                  ],
+                ),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => DefaultAlertDialog(
+                      text:
+                          "Are you sure you want clear the startlist?\nAll progress will be lost.",
+                      actions: [
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "NO",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "YES",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () async {
+                            showDialog(
+                                context: context,
+                                builder: (context) => DefaultProgressDialog(
+                                      title: "Downloading Startlist",
+                                      text: "Please wait...",
+                                    ),
+                                barrierDismissible: false);
+                            await deleteLocalStartlist();
+
+                            await readOfflineStartlist().then((value) {
+                              setState(() {});
+
                               Navigator.of(context).pop();
-                            },
-                          ),
-                          DefaultRoundedButton(
-                            isInverted: true,
-                            text: "YES",
-                            color: Colors.white,
-                            fontSize: 12,
-                            onePressed: () async {
+                              Navigator.of(context).pop();
                               showDialog(
                                   context: context,
-                                  builder: (context) => DefaultProgressDialog(
-                                        title: "Downloading Startlist",
-                                        text: "Please wait...",
-                                      ),
-                                  barrierDismissible: false);
-                              await deleteLocalStartlist();
-
-                              await readOfflineStartlist().then((value) {
-                                setState(() {});
-
+                                  builder: (context) => DefaultAlertDialog(
+                                        text: "Startlist cleared successfully!",
+                                      ));
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              PopupMenuItem(
+                value: 1,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => DefaultAlertDialog(
+                      text:
+                          "Are you sure you want to notify all ${offlineStartList.length} racers? "
+                          "This may use your load balance.",
+                      fontSize: 16,
+                      actions: [
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "NO",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "YES",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () async {
+                            showDialog(
+                                context: context,
+                                builder: (context) => DefaultProgressDialog(
+                                      title: "Sending SMS",
+                                      text: "Please wait...",
+                                    ),
+                                barrierDismissible: false);
+                            Future.delayed(Duration(
+                                    seconds: offlineStartList.length * 1))
+                                .then((value) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => DefaultAlertDialog(
+                                  text: "SMS Successfully sent!",
+                                ),
+                              ).then((value) {
                                 Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => DefaultAlertDialog(
-                                          text:
-                                              "Startlist cleared successfully!",
-                                        ));
                               });
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                            });
+                            for (Map<String, dynamic> racer
+                                in offlineStartList) {
+                              await notifyRacers(
+                                  racerContact:
+                                      racer["contact_number"].toString(),
+                                  textMessage:
+                                      "From: RaceTech PH\n\nGood day, ${racer["racer_name"]}! Your race '${widget.race_details["race_title"]}' is coming up soon!\nPlease be at ${widget.race_details["race_location"]}"
+                                      " 1 hour before ${widget.race_details["race_time"]} on ${widget.race_details["race_date"]}");
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                // row with 2 children
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.mail_outline_rounded,
+                      color: Colors.black,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text("Send SMS")
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => DefaultAlerInputDialog(
+                      controller: _smsMessageController,
+                      text: "Please input your message below",
+                      fontSize: 20,
+                      actions: [
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "CANCEL",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        DefaultRoundedButton(
+                          isInverted: true,
+                          text: "SEND",
+                          color: Colors.white,
+                          fontSize: 12,
+                          onePressed: () async {
+                            showDialog(
+                                context: context,
+                                builder: (context) => DefaultProgressDialog(
+                                      title: "Sending SMS",
+                                      text: "Please wait...",
+                                    ),
+                                barrierDismissible: false);
+                            Future.delayed(Duration(
+                                    seconds: offlineStartList.length * 1))
+                                .then((value) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => DefaultAlertDialog(
+                                  text: "SMS Successfully sent!",
+                                ),
+                              ).then((value) {
+                                Navigator.of(context).pop();
+                              });
+                            });
+
+                            for (Map<String, dynamic> racer
+                                in offlineStartList) {
+                              await notifyRacers(
+                                  // racerContact: "09669252741",
+                                  racerContact:
+                                      racer["contact_number"].toString(),
+                                  textMessage: _smsMessageController.text);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                // row with 2 children
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.mail_outline_rounded,
+                      color: Colors.black,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text("Send Custom SMS")
+                  ],
                 ),
               )
             ],
@@ -192,7 +378,7 @@ class _ManageStartListState extends State<ManageStartList> {
               children: [
                 Container(
                   alignment: Alignment.center,
-                  height: 80,
+                  height: 50,
                   margin: EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
@@ -203,8 +389,7 @@ class _ManageStartListState extends State<ManageStartList> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                       ),
-                      Expanded(
-                          child: DefaultIconTextField(
+                      DefaultIconTextField(
                         controller: _refNumberController,
                         onIconClicked: () {
                           setState(() {
@@ -213,7 +398,7 @@ class _ManageStartListState extends State<ManageStartList> {
                         },
                         hintText: "Ref. No.",
                         iconData: Icons.search,
-                      )),
+                      ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10),
                       ),

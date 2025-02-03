@@ -10,6 +10,7 @@ import 'package:racetech_dashboard/widgets/defaultProgressDialog.dart';
 import 'package:racetech_dashboard/widgets/defaultRoundedButton.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
 import "dart:convert";
+
 import "package:provider/provider.dart";
 import "package:http/http.dart" as http;
 
@@ -419,6 +420,15 @@ class _SignupScreenState extends State<SignupScreen> {
                             context: context,
                             builder: (context) => DefaultAlertDialog(
                               text: "Please set a contact person.",
+                            ),
+                          );
+                          return;
+                        }
+                        if (_addressController.text.isEmpty) {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => DefaultAlertDialog(
+                              text: "Please input your address.",
                             ),
                           );
                           return;
