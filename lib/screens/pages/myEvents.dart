@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:racetech_dashboard/models/sessionDetails.dart';
@@ -5,7 +8,9 @@ import 'package:racetech_dashboard/screens/pages/manageStartList.dart';
 import 'package:racetech_dashboard/screens/pages/raceDetails.dart';
 import "package:provider/provider.dart";
 import 'package:racetech_dashboard/utils/colors.dart';
+import 'package:racetech_dashboard/widgets/defaultIconTextField.dart';
 import 'package:racetech_dashboard/widgets/defaultText.dart';
+import 'package:path_provider/path_provider.dart';
 
 class MyEvents extends StatefulWidget {
   const MyEvents({Key? key}) : super(key: key);
@@ -15,6 +20,8 @@ class MyEvents extends StatefulWidget {
 }
 
 class _MyEventsState extends State<MyEvents> {
+  TextEditingController _raceTitleController = TextEditingController();
+  late List<Map<String, dynamic>> raceData;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,21 +33,71 @@ class _MyEventsState extends State<MyEvents> {
           direction: Axis.vertical,
           children: [
             Expanded(
+              flex: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  DefaultText(
+                    text: "Search by:",
+                    fontSize: 16,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  Expanded(
+                      child: DefaultIconTextField(
+                    controller: _raceTitleController,
+                    onIconClicked: () {
+                      setState(() {});
+                    },
+                    onTextChanged: (textValue) {
+                      setState(() {});
+                    },
+                    hintText: "Race title",
+                    iconData: Icons.search,
+                  )),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     setState(() {
+                  //       _isScanning = _isScanning ? false : true;
+                  //     });
+                  //   },
+                  //   child: Icon(Icons.qr_code_2_rounded,
+                  //       size: 32, color: Colors.white),
+                  // )
+                ],
+              ),
+            ),
+            Expanded(
                 flex: 10,
                 child: Consumer<SessionDetails>(
-                  builder: (context, value, child) {
+                  builder: (context, sessionDetailsRaceData, child) {
+                    raceData = sessionDetailsRaceData.myEventList!;
+                    if (_raceTitleController.text.isNotEmpty) {
+                      raceData = sessionDetailsRaceData.myEventList!
+                          .where((race) => race["race_title"]
+                              .toString()
+                              .toLowerCase()
+                              .contains(
+                                  _raceTitleController.text.toLowerCase()))
+                          .toList();
+                    }
                     return Container(
                       padding: EdgeInsets.only(top: 10),
                       child: RefreshIndicator(
                         onRefresh: () async {
-                          if (value.myEventList != null) {
+                          if (raceData != null) {
                             setState(() {});
                           }
                         },
                         child: ListView.builder(
-                          itemCount: value.myEventList == null
-                              ? 0
-                              : value.myEventList!.length,
+                          itemCount: raceData == null ? 0 : raceData.length,
                           itemBuilder: (context, index) => GestureDetector(
                             child: Container(
                               clipBehavior: Clip.hardEdge,
@@ -64,8 +121,7 @@ class _MyEventsState extends State<MyEvents> {
                                       children: [
                                         Container(
                                           width: double.maxFinite,
-                                          child: value.myEventList![index]
-                                              ["event_image"],
+                                          child: raceData[index]["event_image"],
                                         ),
                                         Container(
                                           decoration: ShapeDecoration(
@@ -125,14 +181,15 @@ class _MyEventsState extends State<MyEvents> {
                                                           Navigator.of(context)
                                                               .push(
                                                                   MaterialPageRoute(
-                                                            builder: (context) => ManageStartList(
-                                                                race_details:
-                                                                    value.myEventList![
-                                                                        index],
-                                                                race_id: value
-                                                                            .myEventList![
-                                                                        index][
-                                                                    "race_id"]),
+                                                            builder: (context) =>
+                                                                ManageStartList(
+                                                                    race_details:
+                                                                        raceData![
+                                                                            index],
+                                                                    race_id: raceData![
+                                                                            index]
+                                                                        [
+                                                                        "race_id"]),
                                                           ));
                                                         },
                                                         value: 2,
@@ -162,7 +219,7 @@ class _MyEventsState extends State<MyEvents> {
                                                 ],
                                               ),
                                               DefaultText(
-                                                text: value.myEventList![index]
+                                                text: raceData![index]
                                                         ["race_title"]
                                                     .toString(),
                                                 fontSize: 20,
@@ -202,7 +259,7 @@ class _MyEventsState extends State<MyEvents> {
                                                     horizontal: 2),
                                               ),
                                               DefaultText(
-                                                text: value.myEventList![index]
+                                                text: raceData![index]
                                                     ["race_location"],
                                                 fontSize: 16,
                                                 fontFamily: "MontserratBlack",
@@ -225,7 +282,7 @@ class _MyEventsState extends State<MyEvents> {
                                                     horizontal: 2),
                                               ),
                                               DefaultText(
-                                                text: value.myEventList![index]
+                                                text: raceData![index]
                                                     ["race_date"],
                                                 fontSize: 16,
                                                 color: const Color.fromARGB(
@@ -246,7 +303,7 @@ class _MyEventsState extends State<MyEvents> {
                                                     horizontal: 2),
                                               ),
                                               DefaultText(
-                                                text: value.myEventList![index]
+                                                text: raceData![index]
                                                     ["race_time"],
                                                 fontSize: 16,
                                                 color: const Color.fromARGB(

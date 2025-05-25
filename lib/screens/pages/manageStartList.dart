@@ -1,11 +1,15 @@
+// ignore_for_file: dead_code
+
 import 'dart:convert';
 import "dart:io";
+import "package:flutter/services.dart";
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:racetech_dashboard/models/sessionDetails.dart';
 import 'package:racetech_dashboard/providers/startListStateProvider.dart';
 import 'package:racetech_dashboard/screens/pages/assignBibNumber.dart';
+import 'package:racetech_dashboard/screens/pages/editRacer.dart';
 import 'package:racetech_dashboard/utils/colors.dart';
 import 'package:racetech_dashboard/widgets/categoryCards.dart';
 import 'package:racetech_dashboard/widgets/defaultAlertDialog.dart';
@@ -31,6 +35,10 @@ class ManageStartList extends StatefulWidget {
   _ManageStartListState createState() => _ManageStartListState();
 }
 
+List<Map<String, dynamic>> categories =
+    List<Map<String, dynamic>>.empty(growable: true);
+List<Map<String, dynamic>> distances =
+    List<Map<String, dynamic>>.empty(growable: true);
 List<Barcode> _barcodes = [];
 
 class _ManageStartListState extends State<ManageStartList> {
@@ -70,34 +78,62 @@ class _ManageStartListState extends State<ManageStartList> {
       if (exists) {
         // Read the file
         final contents = await file.readAsString();
-        if (_refNumberController.text.isEmpty) {
+        if (true) {
+          // if (_refNumberController.text.isEmpty) {
           offlineStartList = List<Map<String, dynamic>>.from(
               json.decode(contents)["startlist"]);
+          categories = List<Map<String, dynamic>>.from(
+              json.decode(contents)["category"]);
+          distances = List<Map<String, dynamic>>.from(
+              json.decode(contents)["distance"]);
         } else {
           offlineStartList = List<Map<String, dynamic>>.from(
                   json.decode(contents)["startlist"])
-              .where((element) => element["ref_id"]
-                  .toString()
-                  .contains(_refNumberController.text))
+              .where((element) =>
+                  element["ref_id"]
+                      .toString()
+                      .contains(_refNumberController.text) ||
+                  element["racer_name"]
+                      .toString()
+                      .toLowerCase()
+                      .contains(_refNumberController.text.toLowerCase()))
               .toList();
+          categories = List<Map<String, dynamic>>.from(
+              json.decode(contents)["category"]);
+          distances = List<Map<String, dynamic>>.from(
+              json.decode(contents)["distance"]);
         }
       } else {
         final startListFile = await downloadStartList();
         final contents = await startListFile.readAsString();
-        if (_refNumberController.text.isEmpty) {
+        if (true) {
           offlineStartList = List<Map<String, dynamic>>.from(
               json.decode(contents)["startlist"]);
+          categories = List<Map<String, dynamic>>.from(
+              json.decode(contents)["category"]);
+          distances = List<Map<String, dynamic>>.from(
+              json.decode(contents)["distance"]);
         } else {
           offlineStartList = List<Map<String, dynamic>>.from(
                   json.decode(contents)["startlist"])
-              .where((element) => element["ref_id"]
-                  .toString()
-                  .contains(_refNumberController.text))
+              .where((element) =>
+                  element["ref_id"]
+                      .toString()
+                      .contains(_refNumberController.text) ||
+                  element["racer_name"]
+                      .toString()
+                      .toLowerCase()
+                      .contains(_refNumberController.text.toLowerCase()))
               .toList();
+          categories = List<Map<String, dynamic>>.from(
+              json.decode(contents)["category"]);
+          distances = List<Map<String, dynamic>>.from(
+              json.decode(contents)["distance"]);
         }
       }
     } catch (e) {
       // If encountering an error, return 0
+      print(e);
       offlineStartList = List.empty();
     }
   }
@@ -443,224 +479,348 @@ class _ManageStartListState extends State<ManageStartList> {
                         future: readOfflineStartlist(),
                         builder: (context, snapshot) {
                           return ListView.builder(
-                            itemBuilder: (context, index) => Container(
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 16),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 20),
-                              decoration: ShapeDecoration(
-                                shadows: defaultCardShadowsDarkMale,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    side: BorderSide(
-                                        color: Color.fromARGB(
-                                            255, 225, 242, 255))),
-                                color: Color.fromARGB(255, 30, 30, 31),
-                              ),
-                              height: 220,
-                              child: Flex(
-                                direction: Axis.vertical,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      categoryCardMap[offlineStartList[index]
-                                              ["category"]
-                                          .toString()]!,
-                                      Container(
-                                          padding:
-                                              EdgeInsetsDirectional.symmetric(
-                                                  horizontal: 10),
-                                          alignment: Alignment.centerRight,
-                                          // decoration: BoxDecoration(
-                                          //   gradient: LinearGradient(colors: [
-                                          //     const Color.fromARGB(0, 0, 0, 0),
-                                          //     Color.fromARGB(153, 253, 198, 161)
-                                          //   ]),
-                                          // ),
-                                          child: offlineStartList[index]
-                                                      ["bib_number"] !=
-                                                  null
-                                              ? DefaultText(
-                                                  text: offlineStartList[index]
-                                                      ["bib_number"],
-                                                  fontSize: 24,
-                                                  fontFamily: "MontserratBold",
-                                                  color: Color.fromARGB(
-                                                      255, 219, 221, 255),
-                                                )
-                                              : DefaultText(
-                                                  text: "N/A",
-                                                  fontSize: 20,
-                                                  fontFamily: "MontserratBold",
-                                                  color: Color.fromARGB(
-                                                      255, 219, 221, 255),
-                                                ))
-                                    ],
-                                  ),
-                                  Expanded(
-                                    child: DefaultText(
-                                      text: offlineStartList[index]
-                                          ["racer_name"],
-                                      fontSize: 24,
-                                      fontFamily: "MontserratBold",
-                                    ),
-                                  ),
-                                  Padding(padding: EdgeInsets.only(top: 2)),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          offlineStartList[index]["gender"]
-                                                  .toString()
-                                                  .contains("FEMALE")
-                                              ? Icons.woman_outlined
-                                              : Icons.man_4,
-                                          color: offlineStartList[index]
-                                                      ["gender"]
-                                                  .toString()
-                                                  .contains("FEMALE")
-                                              ? const Color.fromARGB(
-                                                  255, 255, 90, 145)
-                                              : const Color.fromARGB(
-                                                  255, 47, 75, 231),
-                                        ),
-                                        DefaultText(
-                                          text: offlineStartList[index]
-                                                  ["gender"]
-                                              .toString(),
-                                          fontSize: 20,
-                                          fontFamily: "Montserrat",
-                                          color: offlineStartList[index]
-                                                      ["gender"]
-                                                  .toString()
-                                                  .contains("FEMALE")
-                                              ? const Color.fromARGB(
-                                                  255, 255, 90, 145)
-                                              : const Color.fromARGB(
-                                                  255, 47, 75, 231),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        DefaultText(
-                                          text: "Distance",
-                                          fontSize: 16,
-                                          fontFamily: "Montserrat",
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 4),
-                                        ),
-                                        Expanded(
-                                          child: LinearProgressIndicator(
+                            itemBuilder: (context, index) => (offlineStartList[
+                                            index]["ref_id"]
+                                        .toString()
+                                        .contains(_refNumberController.text) ||
+                                    offlineStartList[index]["racer_name"]
+                                        .toString()
+                                        .toLowerCase()
+                                        .contains(_refNumberController.text
+                                            .toLowerCase()))
+                                ? GestureDetector(
+                                    onLongPress: () {
+                                      HapticFeedback.heavyImpact();
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (context) => EditRacer(
+                                                  startList: offlineStartList,
+                                                  itemIndex: index,
+                                                  categories: categories,
+                                                  distances: distances,
+                                                  racer_id:
+                                                      offlineStartList[index]
+                                                              ["racer_id"]
+                                                          .toString(),
+                                                  bib_number:
+                                                      offlineStartList[index]
+                                                              ["bib_number"]
+                                                          .toString(),
+                                                  race_id: widget.race_id)))
+                                          .then((value) {
+                                        readOfflineStartlist();
+                                        setState(() {});
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 16),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 20, horizontal: 20),
+                                      decoration: ShapeDecoration(
+                                        shadows: defaultCardShadowsDarkMale,
+                                        shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(8),
-                                            backgroundColor: Colors.transparent,
-                                            value: 1,
-                                            color: Color.fromARGB(
-                                                255, 226, 132, 56),
+                                                BorderRadius.circular(10),
+                                            side: BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 225, 242, 255))),
+                                        color: Color.fromARGB(255, 30, 30, 31),
+                                      ),
+                                      height: 220,
+                                      child: Flex(
+                                        direction: Axis.vertical,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              categoryCardMap[
+                                                      offlineStartList[index]
+                                                              ["category"]
+                                                          .toString()] ??
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 3,
+                                                        horizontal: 3),
+                                                    width: 65,
+                                                    height: 35,
+                                                    decoration: ShapeDecoration(
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                        ),
+                                                        gradient:
+                                                            const LinearGradient(
+                                                                colors: [
+                                                              Color.fromARGB(
+                                                                  255,
+                                                                  197,
+                                                                  55,
+                                                                  20),
+                                                              Color.fromARGB(
+                                                                  255,
+                                                                  252,
+                                                                  130,
+                                                                  74)
+                                                            ],
+                                                                begin: Alignment
+                                                                    .bottomLeft,
+                                                                end: Alignment
+                                                                    .topRight)),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        const Icon(
+                                                          CupertinoIcons
+                                                              .flame_fill,
+                                                          color: Colors.white,
+                                                          size: 14,
+                                                        ),
+                                                        DefaultText(
+                                                          text: offlineStartList[
+                                                                      index][
+                                                                  "category"] ??
+                                                              "",
+                                                          fontSize: 14,
+                                                          fontFamily:
+                                                              "MontserratBold",
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                              Container(
+                                                  padding: EdgeInsetsDirectional
+                                                      .symmetric(
+                                                          horizontal: 10),
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  // decoration: BoxDecoration(
+                                                  //   gradient: LinearGradient(colors: [
+                                                  //     const Color.fromARGB(0, 0, 0, 0),
+                                                  //     Color.fromARGB(153, 253, 198, 161)
+                                                  //   ]),
+                                                  // ),
+                                                  child: offlineStartList[index]
+                                                              ["bib_number"] !=
+                                                          null
+                                                      ? DefaultText(
+                                                          text:
+                                                              offlineStartList[
+                                                                      index][
+                                                                  "bib_number"],
+                                                          fontSize: 24,
+                                                          fontFamily:
+                                                              "MontserratBold",
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              219,
+                                                              221,
+                                                              255),
+                                                        )
+                                                      : DefaultText(
+                                                          text: "N/A",
+                                                          fontSize: 20,
+                                                          fontFamily:
+                                                              "MontserratBold",
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              219,
+                                                              221,
+                                                              255),
+                                                        ))
+                                            ],
                                           ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 4),
-                                        ),
-                                        DefaultText(
-                                          text: offlineStartList[index]
-                                                  ["distance_name"]
-                                              .toString(),
-                                          fontSize: 16,
-                                          fontFamily: "Montserrat",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: DefaultText(
-                                      text: "Reference Number: " +
-                                          offlineStartList[index]["ref_id"],
-                                      fontSize: 12,
-                                      fontFamily: "Montserrat",
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        _startListProvider
-                                            .setStartList(offlineStartList);
-                                        if (_startListProvider
-                                            .startList.isNotEmpty) {
-                                          Navigator.of(context)
-                                              .push(MaterialPageRoute(
-                                            builder: (context) =>
-                                                AssignBibNumber(
-                                              selectedRacer: index,
-                                              race_id: widget.race_id,
-                                            ),
-                                          ))
-                                              .then((value) {
-                                            setState(() {
-                                              readOfflineStartlist();
-                                            });
-                                          });
-                                        }
-                                      },
-                                      child: Container(
-                                        margin: EdgeInsets.only(top: 5),
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 1, horizontal: 4),
-                                        decoration: ShapeDecoration(
-                                          gradient: LinearGradient(colors: [
-                                            Color.fromARGB(255, 32, 128, 253),
-                                            Color.fromARGB(255, 22, 71, 134)
-                                          ]),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(60),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            DefaultText(
-                                              text: "Assign Bib",
-                                              fontSize: 16,
+                                          Expanded(
+                                            child: DefaultText(
+                                              text: offlineStartList[index]
+                                                  ["racer_name"],
+                                              fontSize: 24,
                                               fontFamily: "MontserratBold",
-                                              color: Colors.white,
                                             ),
-                                            Icon(
-                                              Icons.chevron_right_rounded,
-                                              size: 20,
-                                              color: Colors.white,
-                                            )
-                                          ],
-                                        ),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.only(top: 2)),
+                                          Expanded(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  offlineStartList[index]
+                                                              ["gender"]
+                                                          .toString()
+                                                          .contains("FEMALE")
+                                                      ? Icons.woman_outlined
+                                                      : Icons.man_4,
+                                                  color: offlineStartList[index]
+                                                              ["gender"]
+                                                          .toString()
+                                                          .contains("FEMALE")
+                                                      ? const Color.fromARGB(
+                                                          255, 255, 90, 145)
+                                                      : const Color.fromARGB(
+                                                          255, 47, 75, 231),
+                                                ),
+                                                DefaultText(
+                                                  text: offlineStartList[index]
+                                                          ["gender"]
+                                                      .toString(),
+                                                  fontSize: 20,
+                                                  fontFamily: "Montserrat",
+                                                  color: offlineStartList[index]
+                                                              ["gender"]
+                                                          .toString()
+                                                          .contains("FEMALE")
+                                                      ? const Color.fromARGB(
+                                                          255, 255, 90, 145)
+                                                      : const Color.fromARGB(
+                                                          255, 47, 75, 231),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                DefaultText(
+                                                  text: "Distance",
+                                                  fontSize: 16,
+                                                  fontFamily: "Montserrat",
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 4),
+                                                ),
+                                                Expanded(
+                                                  child:
+                                                      LinearProgressIndicator(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    value: 1,
+                                                    color: Color.fromARGB(
+                                                        255, 226, 132, 56),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 4),
+                                                ),
+                                                DefaultText(
+                                                  text: offlineStartList[index]
+                                                          ["distance_name"]
+                                                      .toString(),
+                                                  fontSize: 16,
+                                                  fontFamily: "Montserrat",
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: DefaultText(
+                                              text: "Reference Number: " +
+                                                      offlineStartList[index]
+                                                              ["ref_id"]
+                                                          .toString() ??
+                                                  "",
+                                              fontSize: 12,
+                                              fontFamily: "Montserrat",
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                _startListProvider.setStartList(
+                                                    offlineStartList);
+                                                if (_startListProvider
+                                                    .startList.isNotEmpty) {
+                                                  Navigator.of(context)
+                                                      .push(MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AssignBibNumber(
+                                                            selectedRacer:
+                                                                index,
+                                                            race_id:
+                                                                widget.race_id,
+                                                            categories:
+                                                                categories,
+                                                            distances:
+                                                                distances),
+                                                  ))
+                                                      .then((value) {
+                                                    setState(() {
+                                                      readOfflineStartlist();
+                                                    });
+                                                  });
+                                                }
+                                              },
+                                              child: Container(
+                                                margin: EdgeInsets.only(top: 5),
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 1, horizontal: 4),
+                                                decoration: ShapeDecoration(
+                                                  gradient: LinearGradient(
+                                                      colors: [
+                                                        Color.fromARGB(
+                                                            255, 32, 128, 253),
+                                                        Color.fromARGB(
+                                                            255, 22, 71, 134)
+                                                      ]),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            60),
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    DefaultText(
+                                                      text: "Assign Bib",
+                                                      fontSize: 16,
+                                                      fontFamily:
+                                                          "MontserratBold",
+                                                      color: Colors.white,
+                                                    ),
+                                                    Icon(
+                                                      Icons
+                                                          .chevron_right_rounded,
+                                                      size: 20,
+                                                      color: Colors.white,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                  )
+                                : Container(),
                             itemCount: offlineStartList == null
                                 ? 0
                                 : offlineStartList.length,
@@ -692,11 +852,13 @@ class _ManageStartListState extends State<ManageStartList> {
                       "ref_id": racist["ref_id"].toString(),
                       "bib_number": racist["bib_number"].toString(),
                       "racer_name": racist["racer_name"].toString(),
+                      "team_name": racist["team_name"].toString(),
+                      "contact_number": racist["contact_number"].toString(),
                       "gender": racist["gender"].toString(),
                       "chip_id": racist["chip_id"].toString(),
                       "category": racist["category"].toString(),
                       "distance_name": racist["distance_name"].toString(),
-                      "shirt": "0"
+                      "shirt": ""
                     });
                   });
                   await http
@@ -709,12 +871,20 @@ class _ManageStartListState extends State<ManageStartList> {
                                 .toString(),
                             "content-type": "application/json"
                           },
-                          body: json.encode({"startlist_data": startlistData}))
+                          body: json.encode({
+                            "startlist_data": startlistData,
+                            "category": categories,
+                            "distance": distances
+                          }))
                       .then((value) {
                     print(value.statusCode);
                     print(value.reasonPhrase);
                     print(value.body);
-                    print(json.encode({"startlist_data": startlistData}));
+                    print(json.encode({
+                      "startlist_data": startlistData,
+                      "category": categories,
+                      "distance": distances
+                    }));
                     Navigator.of(context).pop();
                   });
                 },

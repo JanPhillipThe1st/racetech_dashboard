@@ -15,9 +15,15 @@ import "package:mobile_scanner/mobile_scanner.dart";
 
 class AssignBibNumber extends StatefulWidget {
   const AssignBibNumber(
-      {Key? key, required this.selectedRacer, required this.race_id})
+      {Key? key,
+      required this.selectedRacer,
+      required this.race_id,
+      required this.categories,
+      required this.distances})
       : super(key: key);
   final String race_id;
+  final List<Map<String, dynamic>> categories;
+  final List<Map<String, dynamic>> distances;
   final int selectedRacer;
   @override
   _AssignBibNumberState createState() => _AssignBibNumberState();
@@ -45,7 +51,11 @@ class _AssignBibNumberState extends State<AssignBibNumber> {
     final file = await _localFile;
 
     // Write the file
-    return file.writeAsString(json.encode({"startlist": map}));
+    return file.writeAsString(json.encode({
+      "startlist": map,
+      "category": widget.categories,
+      "distance": widget.distances
+    }));
   }
 
   bool _isScanning = false;

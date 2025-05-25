@@ -26,13 +26,13 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  // TextEditingController _usernameController =
-  //     TextEditingController(text: "mikeshinobida1920@gmail.com");
+  TextEditingController _usernameController =
+      TextEditingController(text: "mikeshinobida1920@gmail.com");
 
-  // TextEditingController _passwordController =
-  //     TextEditingController(text: "theDeathGodKuro!");
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _passwordController =
+      TextEditingController(text: "theDeathGodKuro!");
+  // TextEditingController _usernameController = TextEditingController();
+  // TextEditingController _passwordController = TextEditingController();
 
   launchMailto() async {
     final mailtoLink = Mailto(

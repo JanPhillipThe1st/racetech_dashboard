@@ -84,7 +84,9 @@ class SessionDetails with ChangeNotifier {
   void getMyEventList() async {
     http.Response response = await http.get(
       Uri.parse("https://racetechph.com/myeventlist?"),
-      headers: {"cookie": sessionDetailsMap!["cookie"].toString()},
+      headers: {
+        "cookie": sessionDetailsMap!["cookie"].toString(),
+      },
     ).then((value) => value);
     myEventList = List<Map<String, dynamic>>.from(json.decode(response.body));
     myEventList!.forEach((eventObject) {
